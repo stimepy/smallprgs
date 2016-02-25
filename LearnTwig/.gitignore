@@ -1,0 +1,4 @@
+finish/vendor/
+composer.json
+composer.lock
+.idea
