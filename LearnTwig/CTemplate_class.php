@@ -8,7 +8,7 @@
  * Copyright (c) 2014
  * Version 1.0
  */
-if(!defined('PMC_INIT')){
+/*if(!defined('PMC_INIT')){
     die('Your not suppose to be in here! - Ibid');
 }
 
@@ -33,8 +33,8 @@ class CTemplate {
      */
     public function __construct(){
         global $gx_config, $gx_library;
-        $theme = $gx_config['config']['theme']; //todo: set up for db to overwrite this.
-        require_once ('Autoloader.php');
+        //$theme = $gx_config['config']['theme']; //todo: set up for db to overwrite this.
+        require_once ('Twig/autoloader.php');
         //$gx_library->loadLibraryFile($gx_config->config['paths']['vendor'], 'Autoloader.php');
         //$this->loader = new Twig_Loader_Filesystem($gx_config['paths']['themepath'].$theme);
         $this->loader = new Twig_Loader_Filesystem(templates);
