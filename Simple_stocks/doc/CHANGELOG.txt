@@ -1,0 +1,302 @@
+Version 2.1.6 - Spanish Wells
+----------------------------------
+Core - General
+  - Now attempt to detect if a template name passed into CmsModule::GetTemplateResource() is already a resource string.
+  - endswith is now an accepted function in Smarty templates (fixes typo in security policy).
+  - Fixes for CmsNlsOperations when using a language detector.
+  - Fixes warnings in useroperations.
+  - Fixes problem with cms_selflink dir='up' since 2013.
+  - Modifies the OneEleven theme to set the meta referrer attribute for security purposes.
+  - Modifies the functionality of the CSRF tokens to be more secure (only set the cookie in one location, only set the session variable from the cookie).
+  - Increase Admin users list limit.
+  - Reduce time limit for daily version check to 3 seconds.
+  - cleanValues in Admin log and List Content.
+  - #11198 - Fixes problem with cms_selflink with aliases that starts with a numeric sign.
+  - Change new version check to timeout after 3 seconds..
+  - minor fix to the relative_time plugin.
+  - Admin menu item urls can now be built from the remaining members of the object, if not specified.
+  - {content_image} and {content_module} now preserve order properly and support the priority attribute.
+
+Content Manager v1.1.4
+  - Fix bulk set-non-cachable functionality.
+  - Fix a bug wrt content blocks and the adding flag.
+
+Installation Assistant v1.0.4
+  - Adds recommended check for ZipArchive.
+  - Improves method of determining a temp directory.
+
+ModuleManager v2.0.5
+  - Improves functionality if ModuleRepository is not available.
+
+News v2.50.6
+  - Minor fix to editing news articles from the Admin interface.
+
+
+Version 2.1.5 - High Rock
+----------------------------------
+Core - General
+  - Fix fatal error if an extcss stylesheet was placed in the Admin theme.
+  - Another minor fix to clearing cached files.
+  - Fixes problems where all files (including dot files) had to be writable before creating a module XML file.
+  - Fixes minor notice in user operations.
+  - Fixes for namespaced modules.
+  - Fixes an issue in CmsLayoutTemplate when creating a template from a type.
+  - Fixes an issue where a 404 handler error page would not be rendered correctly if for some reason the route did not specify a page id to load.
+  - More fixes to cms_url class.
+  - Improve the way page aliases are munged when they are supplied.
+  - Improve the error generated when a page alias cannot be generated.
+  - Minor fixes to the form_start plugin.
+  - Minor fixes to generation of moduleinfo.ini.
+  - Fix an error message in the autorefresh JavaScript class.
+  - Fix problems that could result in uid=1 becoming inactive, and not a member of other groups when edited by another user.
+  - Fix query problem in CmsLayoutStylesheetQuery with Mysql 5.7.
+  
+  - #11080 - Parameter $adding in GetContentBlockFieldInput always FALSE.
+  - #11093 - Bad error message in jquery.cmsms_autorefresh.js.
+
+Content Manager
+  - Improve error handling in Edit Content.
+  - Fix a problem with the call to GetTabElements.
+
+Design Manager
+  - Fix problem with resetting a template back to factory defaults, or creating a new template from factory defaults.
+
+Module Manager
+  - Improve the way modules with dependencies are installed and upgraded. (Got rid of the queue stuff).
+
+AdminSearch 
+  - Use 'Manage Stylesheets' permission, not 'Modify Stylesheets' when searching stylesheets.
+
+Phar Installer
+  - Adds missing 'Manage Stylesheets' permission that would not be created on upgrade from 1.12.
+  
+  
+Version 2.1.4 - Freetown
+----------------------------------
+Core - General
+  - Fix to the clear_cached_file() method which should fix problems with module installation.
+  - Minor tweak to distributed sample htaccess.txt file.
+
+Phar Installer
+  - Fixes issues with respect to hanging on step 7 when suhosin PHP addon was installed.
+  - Minor PHP7 Fixes.
+
+Module Manager
+  - Fixes problems where all files (including dot files) had to be writable before creating a module XML file.
+
+  
+Version 2.1.3 - Black Point
+----------------------------------
+Core - General
+  - Security fix to prevent HTTP_HOST attacks. Many thanks to I-TRACING (www.i-tracing.com) for reporting it!!
+  - Remove stub .htaccess files from subdirectories.
+  - Update the included sample htaccess.txt file for security.
+  - Fix for endless loop when calculating a page alias in utf-8 environments.
+  - Fix for endless loop when calculating a page alias and a page name/title ended with -
+  - Fixes a notice on the login page.
+  - Optimize LoadContentFromId() to be typesafe, and use default page, if the id passed in is invalid.
+  - Fix error condition if there were no default default design, or default page template.
+  - Fix problem with system verification.
+
+  - #10825 - Admin-account settings don't remember startpage if you set one.
+  - #10874 - When creating a page and the title has specific characters, CMSMS stops responding.
+  - #10910 - content and content_module order incorrect Admin page.
+  - #10911 - 'Use Admin Search' permission not being used in 2.1.2.
+  - #10921 - Content Field to Display in Name Column not used.
+
+AdminSearch v1.0.1
+  - Minor fix to permissions checks.
+
+Navigator v1.0.3
+  - Improved exception handling on install.
+
+News v2.50.5
+  - Fix error condition if no results were returned.
+
+Installation Assistant v1.0.3.1
+  - Tweaks to README files.
+  - Improved error handling in some circumstances.
+  - Fix some PHP7 issues.
+
+FileManager
+  - #10871 - FileManager moving folder.
+
+  
+Version 2.1.2 - Andros Town
+----------------------------------
+Core - General
+- Minor fix to missing language string stuff
+- Fixes to home page preferences
+- API documentation fixes (minor)
+- Fixes for ajax_content (the Ajax routine behind the parent selector in edit content) to handle ordering inconsistencies
+- Remove die statement in is_email
+- Minor fix to the relative_time modifier
+- Upgrade CMSMailer to 6.2.14
+- Now do a check for E_ALL in the system info
+
+News v2.50.4
+- Now all field definitions can be deleted
+- Minor fix to default action if no results were returned...
+
+ModuleManager v2.0.2
+- Revamp module dependency calculations when installing a module
+- Minor fix for some notices in install and upgrade modules
+- Minor typo fixes
+- Minor fixes for PHP7
+
+MenuManager  v1.50.2
+- make sure that uninstall cleans up properly
+
+MicroTiny v2.0.3
+- minor template fix
+- fixes for stylesheet overrides
+
+
+Version 2.1.1 - Nicholls Town
+----------------------------------
+Core - General
+- Fix the template compiler so that content blocks can be placed within sub templates and detected with the {include} tag
+- Fix minor problem with checksum verification
+- Fix to the cms_cache_handler class
+- Minor fix to SetAllPageHierarchies()
+- Correct location where session was started in frontend displays
+- Fix the default option for {content_image}
+- Modify the locker to use a beacon if supported, when unlocking
+- Fix missing permissions when a 1.12 site was upgraded (installation assistant)
+
+CMSContentmanager v1.1
+- Minor template changes in edit content wrt. locking
+- Adds ability to clear content locks (Admins can clear all locks, regular users can only clear their locks)
+- Enhancements to the action to bulk set designs to show only page templates by default, but to optionally show more
+
+DesignManager v1.1.1
+- Minor template changes in edit content wrt. locking
+- Adds ability to clear template and CSS locks (Admins can clear all locks, regular users can only clear their locks)
+
+
+Version 2.1 - Bahamas
+----------------------------------
+Core - General
+- Minor performance tweaks to sample htaccess.txt
+- Minor fix to the ProcessTemplateFromDatabase module API method.
+- Improvements and re-factor the way headers are sent wrt caching
+- Add a new method to the ModuleOperations class to allow a module to be within a namespace.
+- Enhances the Group class.
+- Enhancements and fixes to the cms_url class.
+- Modified the $mod->smarty reference to be smarter... it is now deprecated.
+- Fixes issue with https requests (#10697)
+- Modifies The CmsLayoutTemplate class and CmsLayoutTemplateQuery to allow filtering on listable or non listable
+  or setting a template as listable (default) or non listable
+- Fixes a problem with styling of the login form if tasks must be run AND a module needs upgrading.
+- Fixes to the cloning of templates in CmsLayoutTemplate
+- Fixes problem with SetAllHierarchyPositions that cleared the entire cache instead of only the necessary part of it.
+- Adds the unloadCancel handler to the lockManager jQuery plugin.
+- Moves version.php and include.php inside the lib directory so that they are easier to protect from unwanted direct access.
+- Fixes to page alias tests when manually entering a page alias.
+- Missing language strings are no longer output to Admin log, but to the debug log.
+- Requests for modules that are not installed/enabled, or for invalid actions will now result in 404 errors.
+- Fixed problem where restricted content editors could implicitly change the page alias.
+- Improvements to the system information page, particularly the bbcode output.
+- cms_init_editor, form_start, and cms_action_url plugins are no longer cachable.
+- Adds the 'adminonly' option to the {content}, {content_image}, and {content_module} tags to allow only members of the 'Admin' group to manipulate the values of that block.
+- Add a trivial check to the sitedown message to make sure that it is not empty.
+- Minor fixes for PHP 7
+
+MicroTiny v2.0.2
+- Now add page hierarchy to autocomplete text when using the linker.
+- Now use $smarty->CreateTemplate for clarity when compling the config template
+- Now explicitly assign urls so that they do not get caced by smarty.
+- Slightly tweak the default HTML content in the example tab.
+- Updated tinymce to the latest 4.2.7 version, included the 'paste' plugin, and turned on 'paste_as_text'.
+- Added the ability to enable the table plugin, now distribute the table plugin
+
+CMSContentManager v1.0.2
+- Fix problem with pagedefault metadata.
+- Fixes for handling no listable templates for a design
+- More work with locking.  With only one exception all locking and unlocking is initiated via javascript.
+- Minor fix to copycontent
+
+DesignManager v1.1
+- Adds ability to toggle the listability of a template.
+- Fixes problems with lost changes if there is a syntax error in the template.
+- More work with locking.  With only one exception all locking and unlocking is initiated via JavaScript.
+
+News v2.50.3
+- Fixes minor issue with pagination in News Admin console.
+- Fix errors in the default form template.
+- Fixed URL to long issues on redirection after adding/editing article.
+
+Search v1.50.2
+- Minor PHP7 fixes.
+
+ModuleManager 2.0.1
+- Minor fix to which modules could be uninstalled and deactivated.
+
+
+Version 2.0.1.1 - Adelaide
+----------------------------------
+Fix to the $this->smarty magic method in the module class to resolve to the action template or the global Smarty.
+
+
+Version 2.0.1 - Adelaide
+----------------------------------
+Core - General
+- Improved optimization in ContentOperations::SetAllHierarchyPositions.
+- Fixed return type of ContentOperations::GetPageIdFromAlias().
+- Help for the {cms_html_options} plugin.
+- Change the default page template to use {Navigator}.
+- Explicitly force $smarty->fetch() to create a new template, and therefore a new scope. Keep track of scopes in a stack.
+- Change prototype to CMSModule::DoActionBase to pass in the current template object.
+- SITENAME is now assigned as a Smarty global.
+  (fixes some variable scope issues)
+- Fix problem with changing content types.
+- Fix problem with CmsLayoutTemplateQuery wrt the editable option, that generated an SQL error.
+  (resolves problems where people have additional editor access to templates, but no other design manager permissions).
+- Fix minor JavaScript errors in plugin (error checking).
+- Fix problems where If assign was passed to a {content} tag, do not pass it to the module on a mact request.
+- Implements the completely forgotten 403 exception stuff and the IsPermitted content method.
+- Improve the cmsms_dirtyform jQuery plugin to support the unload handler and an onUnload callback.
+- Fixed the jQuery page selector plugin when the current value points to an invalid page,  and fixes for asynchronous Ajax.
+- Adds a globally available cms_busy() JavaScript function for the Admin.
+- Fix problem with html entitites in email addresses in user settings.
+- Fix problem with {content cssname=string} and quotes.
+- Changed cmsms plugins to use $smarty->getTemplateVars() instead of $smarty->get_template_vars() because of scope issues.
+- Minor fix to {form_start} when not used in a module.
+- Improved error handling for cms_stylesheet.  Now will generate a message in the Admin log, and an html comment on error.
+
+CMSContentManager v1.0.1
+- Fixes for changing content types.
+- Adds a title for some contextual help if a template is not available for a content item.
+- Clear any locks if an exception occurred while submitting a content item.
+- Improvements to error handling with apply and preview.
+- Content list now refreshes every 30 seconds to display up-to-date lock information.
+
+DesignManager v1.0.1
+- Clear the type_default flag when copying a template.
+- Clear any locks if an exception occurred while submitting a template.
+- Clear any locks if an exception occurred while submitting a stylesheet.
+- Template and stylesheet lists now refresh every 30 seconds to display up-to-date lock information.
+- Fixes for design exporting templates with protocol-less URLs in them.
+
+MenuManager v1.50.1
+- Changes to createSmartyTemplate calls (now use $smarty->get_template_parent()).
+
+Navigator v1.0.1
+- Changes to createSmartyTemplate calls (now use $smarty->get_template_parent()).
+- Minor change to the help ($node->children_exist)
+
+Search v1.50.1
+- Changes to createSmartyTemplate calls (now use $smarty->get_template_parent()).
+
+News v2.50.1
+- Changes to createSmartyTemplate calls (now use $smarty->get_template_parent()).
+- Fix problem with custom fields not being assigned in fesubmit.
+- Fix minor problem with html entities in the detail template parameter.
+
+FileManager v1.5.1
+- Fix minor problem with Smarty scope in the drop zone.
+
+
+Version 2.0 - Australia
+----------------------------------
++++ Initial Release +++
