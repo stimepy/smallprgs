@@ -78,7 +78,7 @@ from(
 	) tots
 	on(1=1)
 	where ssn.port_id = tots.port_id
-	and currently_owned <> 0
+	and ssn.currently_owned <> 0
 	group by ticker, company_name, ssn.shares, tot_shares, tot_price
 ) alls;
 
@@ -88,7 +88,7 @@ select ticker as "Ticker",
 	company_name as "Company", 
 	action_date "Buy Date", 
 	price_per_share "Price", 
-	round(num_shares) "# shares", 
+	round(num_shares,2) "# shares", 
 	round((price_per_share*num_shares),2) "Cost - Commissions", 
 	round(initial_Fee,2) "Purchase Fee", 
 	round(total_add_fees,2) "Misc Fees",
@@ -140,8 +140,7 @@ and extract(YEAR from pay_date) >= extract(YEAR from now())
 order by ex_div_date,announcement_date, payment_num;
 
 
-
-
+	
 
 
 select dateot "Date of Transaction",
@@ -151,6 +150,7 @@ select dateot "Date of Transaction",
 	round(rt,2) "Run Total",
 	tick "Dividend Ticker",
 	notes "Notes"
+--	,trans_id
 from(
 	select 
 		dateot,
@@ -162,6 +162,7 @@ from(
 		notes,
 		act_id
 		,ticker
+		,trans_id
 	from(
 		select date_of_transaction dateot,
 			act_desc,
@@ -171,6 +172,7 @@ from(
 			,notes
 			,t.act_id
 			,ticker
+			,t.trans_id
 		from tranactions t
 		left join possible_actions  pa
 		using(act_id)
@@ -180,7 +182,7 @@ from(
 			and t.act_id = 8)
 		left join stock_desc sd
 		on(dr.stock_id = sd.stock_id)
-		where t.port_id in (1,2)     -- 1,2,4    total for account
+		where t.port_id in (1,2,4)     -- 1,2,4    total for account
 		order by date_of_transaction
 	)ab
 	join (select @run_tot:=0)c
@@ -204,10 +206,10 @@ update div_record set div_amount = 0.27826 where div_rec_id = 112
 -- insert div
 insert into div_record(port_id, stock_id, payment_num, announcement_date, ex_div_date, record_date, pay_date, num_stocks, div_amount)
 select ssn.port_id, ssn.stock_id, pay.mxpmt, 
-STR_TO_DATE('2-19-2016','%m-%d-%Y') announcement, 
-STR_TO_DATE('3-30-2016','%m-%d-%Y') ex_div_date, 
-STR_TO_DATE('4-1-2016','%m-%d-%Y') record_date, 
-STR_TO_DATE('4-22-2016','%m-%d-%Y') pay_date, 
+STR_TO_DATE('5-15-2017','%m-%d-%Y') announcement, 
+STR_TO_DATE('6-29-2017','%m-%d-%Y') ex_div_date, 
+STR_TO_DATE('7-3-2017','%m-%d-%Y') record_date, 
+STR_TO_DATE('7-17-2017','%m-%d-%Y') pay_date, 
 ssn.shares, sd.current_Quarterly_dividend
 from stock_desc sd
 inner join stable_share_num ssn
@@ -215,11 +217,9 @@ on(sd.stock_id = ssn.stock_id)
 left join (
 	select max(payment_num)+1 mxpmt, stock_id, port_id
 	from div_record d
-	where stock_id = (select stock_id 
+	where stock_id in (select stock_id 
 							from stock_desc sd2
-							where sd2.ticker = 'SYY'
 							)
-	and port_id = 2
 	and pay_date = (select max(pay_date) from div_record sd3
 						where sd3.stock_id = d.stock_id
 						)
@@ -227,10 +227,8 @@ left join (
 )pay
 on(ssn.stock_id = pay.stock_id
 and ssn.port_id = pay.port_id)
-where sd.ticker = 'SYY'
-and ((pay.port_id is not null and ssn.port_id = pay.port_id)
- or ssn.port_id = 2
- );
+where sd.ticker = 'AFSI'
+;
 
 
 
@@ -262,11 +260,19 @@ and port_id = 3
 group by port_id, sd.stock_id, now(),now();
 
 -- or  adding to stable stocks - no splits
-update stable_share_num 
-set shares =(select sum(case when act_id = 1 then num_shares when act_id = 2 then -num_shares end) FROM stock_purc_sold
-WHERE STOCK_ID = (select stock_id from stock_desc where ticker = 'COP'))
-where stock_id = (select stock_id from stock_desc where ticker = 'COP')
-and port_id = 3;
+update stable_share_num  a
+Join (
+		select sum(case when act_id = 1 then num_shares when act_id = 2 then -num_shares end) shares
+		, port_id
+		,stock_id
+	FROM stock_purc_sold
+	WHERE STOCK_ID in (select stock_id from stock_desc where ticker in ('PRDGX', 'RPMGX', 'PRSCX', 'PRTIX'))
+	-- and port_id =
+	group by port_id, stock_id
+)b
+on (a.stock_id = b.Stock_id 
+	and a.port_id = b.port_id)
+set a.shares = b.shares
 
 --trans
 insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id)
@@ -275,7 +281,7 @@ case when act_id = 1 then -1 else 1 end*((price_per_share*num_shares)+initial_Fe
 action_date,
 purc_sold_id -- purc_sold_id
 from stock_purc_sold 
-where action_date = STR_TO_DATE('2-4-2016','%m-%d-%Y');
+where action_date = STR_TO_DATE('3-3-2017','%m-%d-%Y');
 
 
 
@@ -352,10 +358,12 @@ UPDATE yield_hist a
 	on(yh.stock_id = stk.stock_id)
 		where  first_payment <= date_adj_close
 		and calc_yield is null
+		and act_id = 12
 	
 )b
 on(a.stock_id = b.stock_id and a.date_adj_close = b.date_adj_close)
 SET a.calc_yield = b.per;
+
 
 /* -- this is the below, goes inside b.
 	select annual, yh.stock_id, date_adj_close, (annual/adj_close)*100 per 
