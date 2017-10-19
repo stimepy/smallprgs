@@ -1,6 +1,6 @@
 -- div gotten
-insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id)
-select port_id, 8,  round((num_stocks* div_amount),2), pay_date, div_rec_id
+insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
+select port_id, 8,  round((num_stocks* div_amount),2), pay_date, div_rec_id, 1
 from div_record
 where pay_date <= cast(now() as date)
 and div_record.trans_id is null;
@@ -34,24 +34,25 @@ select ticker,
 	shares, 
 	round((total/shares),4) pps, 
 	total total_purchase,  
-	total+(round(lots*4.95,2)) total_purchase_pluscomm,  
+	total_wfee total_purchase_pluscomm,  
 	concat(cast(round((shares/tot_shares)*100,4) as char),'%') "% by stock", 
-	concat(cast(round((total/tot_price)*100,4) as char),'%') "% by value",  
+	concat(cast(round((total/tot_price)*100,4) as char),'%') "% by value no fees",  
 	annual "Annual Dividend", 
 	shares * annual "Annual Tot Div" 
 	, concat(cast(round((annual/(total/shares))*100,4) as char),'%')  "Yield on Cost"
 -- 	, avg((annual/(total/shares))*100)
+	, payment_per_year "Payments Per Year"
 from(
-	select ticker, company_name, round(ssn.shares) shares, 
+	select ticker, company_name, round(ssn.shares,4) shares, 
 		round(sum(case when act_id = 2 then -1*((num_shares*price_per_share))
 		else ((num_shares*price_per_share)) end),2) total,
+		round(sum(case when act_id = 2 then -1*((num_shares*price_per_share)+(initial_Fee+total_add_fees))
+		else ((num_shares*price_per_share)+(initial_Fee+total_add_fees)) end),2) total_wfee,
 		current_Quarterly_dividend quarterly, 
-		current_Quarterly_dividend*4 annual, 
+		current_Quarterly_dividend*payment_per_year annual, 
+		case when payment_per_year is null then 0 else payment_per_year end payment_per_year,
 		tot_shares, 
-		tot_price,
-		sum(case when act_id = 2 and sd.ticker !='DNI' then -1
-			when act_id = 1 and spc.initial_Fee <> 0 then 1 
-			end) lots
+		tot_price
 	from stock_desc sd
 	inner join stable_share_num ssn
 	 using(stock_id)
@@ -70,7 +71,7 @@ from(
 			inner join stock_purc_sold spc
 			 on(ssn.stock_id = spc.stock_id
 				and ssn.port_id = spc.port_id)
-			where ssn.port_id = 3
+			where ssn.port_id = 6
 		)a
 		on(1=1)
 	where ssn.port_id = a.port_id
@@ -124,18 +125,20 @@ order by action_date;
 select payment_num "Payment #", 
 	ticker "Ticker",
 	div_amount "Dividend",
+	num_stocks "Shares Owned", 
 	announcement_date "Accounced Date", 
 	ex_div_date "Ex-date", 
-	num_stocks "Shares Owned", 
 	pay_date "Payed", 
 	round(div_amount*num_stocks,2) "Estimated Payout",
-	case when pay_date<=now() then round(div_amount*num_stocks,2)  else 0 end as "recieved"
-	-- , trans_id
+	case when pay_date<=now() then cash else 0 end as "recieved"
+	-- , div_record.trans_id
 	-- , div_rec_id
 from stock_desc sd
 inner join div_record
 using(Stock_id)
-where port_id = 3
+left join tranactions
+using(trans_id)
+where div_record.port_id = 3
 and extract(YEAR from pay_date) >= extract(YEAR from now())
 order by ex_div_date,announcement_date, payment_num;
 
@@ -191,13 +194,16 @@ where extract(YEAR from dateot) >= extract(YEAR from now());
 
 
 -- PAAY
-select ticker, avg(calc_yield) 
+select ticker, avgyield
+from(
+select ticker, avg(calc_yield) avgyield, COUNT(1) wks
 from yield_hist 
 right join stock_desc
 using(stock_id)
 where date_adj_close >= adddate(now(),-371)
 group by ticker
-
+)b
+where wks >=52
 
 
 -- update div
@@ -233,14 +239,14 @@ where sd.ticker = 'AFSI'
 
 
 -- stock desc
-insert into stock_desc (ticker, associated_market, company_name, current_Quarterly_dividend, currently_owned, website,cred_rat_snp)
-select 'EAT', 'NYSE', 'Brinker International, Inc.', 0.32, 1, 'http://phx.corporate-ir.net/phoenix.zhtml?c=119205&p=irol-irhome', 10;
+insert into stock_desc (ticker, associated_market, company_name, current_Quarterly_dividend, payment_per_year, currently_owned, website,cred_rat_snp)
+select 'EAT', 'NYSE', 'Brinker International, Inc.', 0.32, 4, 1, 'http://phx.corporate-ir.net/phoenix.zhtml?c=119205&p=irol-irhome', 17;
 
 -- purcharse
 insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id)
 select 3, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('10-15-2015','%m-%d-%Y'), -- date
+STR_TO_DATE('10-15-2017','%m-%d-%Y'), -- date
 20, -- # of shares
 59, -- price
 4.95,  -- basic fee
@@ -275,13 +281,15 @@ on (a.stock_id = b.Stock_id
 set a.shares = b.shares
 
 --trans
-insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id)
+insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
 select port_id, act_id, -- port and act id
 case when act_id = 1 then -1 else 1 end*((price_per_share*num_shares)+initial_Fee+total_add_fees), -- total cost
 action_date,
-purc_sold_id -- purc_sold_id
+purc_sold_id,
+0 credit_debit
 from stock_purc_sold 
-where action_date = STR_TO_DATE('3-3-2017','%m-%d-%Y');
+where trans_id is null;
+
 
 
 
@@ -297,13 +305,13 @@ join tranactions as t on temp_id = purc_sold_id
 where ticker = 'WEN'
 
 -- insert interest
-insert into tranactions(port_id, act_id, cash, date_of_transaction, notes)
-values(3, 9, .04, STR_TO_DATE('04-16-2016','%m-%d-%Y'), null);
+insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
+values(3, 9, .04, STR_TO_DATE('04-16-2017','%m-%d-%Y'), 1, null);
 
 
 -- update historical div.
 insert into historical_div(stock_id, first_payment, quarterly, annual)
-select stock_id, pay_date, div_amount, div_amount*4
+select stock_id, pay_date, div_amount, div_amount*payment_per_year
 from(
 	select stock_id, first_payment from historical_div hd1
 	where first_payment in (select max(first_payment) 
@@ -312,13 +320,15 @@ from(
 )his
 right join div_record
 using(stock_id)
+left join stock_desc
+using(stock_id) 
 where payment_num = 1
 and (first_payment < pay_date or first_payment is null);
 
 
 -- insert cash
-insert into tranactions(port_id, act_id, cash, date_of_transaction, notes)
-values(2, 6, 100, STR_TO_DATE('12-31-2015','%m-%d-%Y'), null);
+insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
+values(2, 6, 100, STR_TO_DATE('12-31-2017','%m-%d-%Y'), 1, null);
 
 -- update purchas/sale
 select * FROM stock_purc_sold
@@ -356,8 +366,9 @@ UPDATE yield_hist a
 			)c
 	)stk
 	on(yh.stock_id = stk.stock_id)
-		where  first_payment <= date_adj_close
-		and calc_yield is null
+		where  -- first_payment <= date_adj_close
+--		and
+		calc_yield is null
 		and act_id = 12
 	
 )b
@@ -389,7 +400,7 @@ SET a.calc_yield = b.per;
 insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id)
 select 3, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('09-07-2016','%m-%d-%Y'), -- date
+STR_TO_DATE('09-07-2017','%m-%d-%Y'), -- date
 20, -- # of shares
 28.70, -- price
 4.95,  -- basic fee
@@ -417,13 +428,14 @@ on(a.stable_id = b.stable_id)
 SET a.shares = b.shares, last_updated_dttm = now();
 
 -- insert the transaction
-insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id)
+insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
 select port_id, act_id, -- port and act id
 case when act_id = 1 then -1 else 1 end*((price_per_share*num_shares)+((initial_Fee+total_add_fees)*-1)), -- total cost
 action_date,
-purc_sold_id -- purc_sold_id
+purc_sold_id,
+1
 from stock_purc_sold 
-where action_date = STR_TO_DATE('9-7-2016','%m-%d-%Y');
+where action_date = STR_TO_DATE('9-7-2017','%m-%d-%Y');
 
 
 Update stock_purc_sold as spc
