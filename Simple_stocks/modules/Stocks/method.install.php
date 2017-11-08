@@ -2,7 +2,7 @@
 if( !defined('CMS_VERSION') ){
     exit;
 }
-$this->CreatePermission(Holidays::MANAGE_PERM,'Manage Holidays');
+$this->CreatePermission(Stocks::MANAGE_PERM,'Manage Holidays');
 $db = $this->GetDb();
 $dict = NewDataDictionary($db);
 $taboptarray = array('mysql' => 'TYPE=MyISAM');

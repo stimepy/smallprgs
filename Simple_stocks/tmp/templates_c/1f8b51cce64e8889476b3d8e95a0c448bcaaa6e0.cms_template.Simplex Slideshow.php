@@ -1,17 +1,17 @@
-<?php /* Smarty version Smarty-3.1-DEV, created on 2017-01-05 18:31:53
+<?php /* Smarty version Smarty-3.1-DEV, created on 2017-11-08 16:13:44
          compiled from "cms_template:Simplex Slideshow" */ ?>
-<?php /*%%SmartyHeaderCode:5420586ee579856608-26762567%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:2775a0381981445a1-60621234%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     '1f8b51cce64e8889476b3d8e95a0c448bcaaa6e0' => 
     array (
       0 => 'cms_template:Simplex Slideshow',
-      1 => '1483662539',
+      1 => '1510168142',
       2 => 'cms_template',
     ),
   ),
-  'nocache_hash' => '5420586ee579856608-26762567',
+  'nocache_hash' => '2775a0381981445a1-60621234',
   'function' => 
   array (
   ),
@@ -22,10 +22,10 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => false,
   'version' => 'Smarty-3.1-DEV',
-  'unifunc' => 'content_586ee5798a8699_73260466',
+  'unifunc' => 'content_5a03819818e931_34653070',
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_586ee5798a8699_73260466')) {function content_586ee5798a8699_73260466($_smarty_tpl) {?><?php if (!is_callable('smarty_function_uploads_url')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.uploads_url.php';
-if (!is_callable('smarty_modifier_cms_escape')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\modifier.cms_escape.php';
+<?php if ($_valid && !is_callable('content_5a03819818e931_34653070')) {function content_5a03819818e931_34653070($_smarty_tpl) {?><?php if (!is_callable('smarty_function_uploads_url')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.uploads_url.php';
+if (!is_callable('smarty_modifier_cms_escape')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\modifier.cms_escape.php';
 ?><?php if (isset($_smarty_tpl->tpl_vars['slides'])) {$_smarty_tpl->tpl_vars['slides'] = clone $_smarty_tpl->tpl_vars['slides'];
 $_smarty_tpl->tpl_vars['slides']->value = array(); $_smarty_tpl->tpl_vars['slides']->nocache = null; $_smarty_tpl->tpl_vars['slides']->scope = 0;
 } else $_smarty_tpl->tpl_vars['slides'] = new Smarty_variable(array(), null, 0);?><?php $_smarty_tpl->createLocalArrayVariable('slides', null, 0);

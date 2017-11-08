@@ -4,7 +4,7 @@ class Stocks extends CMSModule{
     const MANAGE_PERM = 'manage_holidays';
 
     public function GetVersion() { return '0.1'; }
-    public function GetFriendlyName() { return $this->Lang('friendlyname'); }
+    public function GetFriendlyName() { return $this->Lang('ConfigInfo'); }  // ['ConfigInfo']['friendlyname']
     public function GetAdminDescription() { return $this->Lang('admindescription'); }
     public function IsPluginModule() { return TRUE; }
     public function HasAdmin() { return TRUE; }

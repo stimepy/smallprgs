@@ -1,17 +1,17 @@
-<?php /* Smarty version Smarty-3.1-DEV, created on 2017-01-05 18:31:53
+<?php /* Smarty version Smarty-3.1-DEV, created on 2017-11-08 16:13:44
          compiled from "cms_template:Simplex Main Navigation" */ ?>
-<?php /*%%SmartyHeaderCode:10110586ee579731646-71984871%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:156155a038198081050-43391905%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     'c57b9d2f578a81d2320a0c971c355eefcf787ce6' => 
     array (
       0 => 'cms_template:Simplex Main Navigation',
-      1 => '1483662546',
+      1 => '1510168147',
       2 => 'cms_template',
     ),
   ),
-  'nocache_hash' => '10110586ee579731646-71984871',
+  'nocache_hash' => '156155a038198081050-43391905',
   'function' => 
   array (
     'do_class' => 
@@ -46,9 +46,9 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => 0,
   'version' => 'Smarty-3.1-DEV',
-  'unifunc' => 'content_586ee5797dd460_01453741',
+  'unifunc' => 'content_5a038198105d89_99358477',
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_586ee5797dd460_01453741')) {function content_586ee5797dd460_01453741($_smarty_tpl) {?><?php if (isset($_smarty_tpl->tpl_vars['main_id'])) {$_smarty_tpl->tpl_vars['main_id'] = clone $_smarty_tpl->tpl_vars['main_id'];
+<?php if ($_valid && !is_callable('content_5a038198105d89_99358477')) {function content_5a038198105d89_99358477($_smarty_tpl) {?><?php if (isset($_smarty_tpl->tpl_vars['main_id'])) {$_smarty_tpl->tpl_vars['main_id'] = clone $_smarty_tpl->tpl_vars['main_id'];
 $_smarty_tpl->tpl_vars['main_id']->value = ' id=\'main-menu\''; $_smarty_tpl->tpl_vars['main_id']->nocache = null; $_smarty_tpl->tpl_vars['main_id']->scope = 0;
 } else $_smarty_tpl->tpl_vars['main_id'] = new Smarty_variable(' id=\'main-menu\'', null, 0);?><?php if (!function_exists('smarty_template_function_do_class')) {
     function smarty_template_function_do_class($_smarty_tpl,$params) {

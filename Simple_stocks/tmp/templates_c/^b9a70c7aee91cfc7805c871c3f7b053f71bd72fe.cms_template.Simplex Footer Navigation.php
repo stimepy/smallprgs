@@ -1,17 +1,17 @@
-<?php /* Smarty version Smarty-3.1-DEV, created on 2017-01-05 18:31:53
+<?php /* Smarty version Smarty-3.1-DEV, created on 2017-11-08 16:13:44
          compiled from "cms_template:Simplex Footer Navigation" */ ?>
-<?php /*%%SmartyHeaderCode:28667586ee579a0be61-94590739%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:224565a0381982983a6-60425540%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     'b9a70c7aee91cfc7805c871c3f7b053f71bd72fe' => 
     array (
       0 => 'cms_template:Simplex Footer Navigation',
-      1 => '1483662546',
+      1 => '1510168147',
       2 => 'cms_template',
     ),
   ),
-  'nocache_hash' => '28667586ee579a0be61-94590739',
+  'nocache_hash' => '224565a0381982983a6-60425540',
   'function' => 
   array (
     'do_footer_class' => 
@@ -44,9 +44,9 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => 0,
   'version' => 'Smarty-3.1-DEV',
-  'unifunc' => 'content_586ee579a81189_96370325',
+  'unifunc' => 'content_5a0381983059d2_98562520',
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_586ee579a81189_96370325')) {function content_586ee579a81189_96370325($_smarty_tpl) {?><?php if (isset($_smarty_tpl->tpl_vars['main_id'])) {$_smarty_tpl->tpl_vars['main_id'] = clone $_smarty_tpl->tpl_vars['main_id'];
+<?php if ($_valid && !is_callable('content_5a0381983059d2_98562520')) {function content_5a0381983059d2_98562520($_smarty_tpl) {?><?php if (isset($_smarty_tpl->tpl_vars['main_id'])) {$_smarty_tpl->tpl_vars['main_id'] = clone $_smarty_tpl->tpl_vars['main_id'];
 $_smarty_tpl->tpl_vars['main_id']->value = ' id=\'footer-menu\''; $_smarty_tpl->tpl_vars['main_id']->nocache = null; $_smarty_tpl->tpl_vars['main_id']->scope = 0;
 } else $_smarty_tpl->tpl_vars['main_id'] = new Smarty_variable(' id=\'footer-menu\'', null, 0);?><?php if (!function_exists('smarty_template_function_do_footer_class')) {
     function smarty_template_function_do_footer_class($_smarty_tpl,$params) {
