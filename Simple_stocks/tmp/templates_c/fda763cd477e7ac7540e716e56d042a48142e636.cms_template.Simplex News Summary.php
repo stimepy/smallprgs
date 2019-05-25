@@ -1,17 +1,17 @@
-<?php /* Smarty version Smarty-3.1-DEV, created on 2017-01-05 18:31:53
+<?php /* Smarty version Smarty-3.1-DEV, created on 2017-11-08 16:13:44
          compiled from "cms_template:Simplex News Summary" */ ?>
-<?php /*%%SmartyHeaderCode:15754586ee579958340-49811180%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:107795a038198203c68-97141447%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     'fda763cd477e7ac7540e716e56d042a48142e636' => 
     array (
       0 => 'cms_template:Simplex News Summary',
-      1 => '1483662546',
+      1 => '1510168148',
       2 => 'cms_template',
     ),
   ),
-  'nocache_hash' => '15754586ee579958340-49811180',
+  'nocache_hash' => '107795a038198203c68-97141447',
   'function' => 
   array (
   ),
@@ -34,11 +34,11 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => false,
   'version' => 'Smarty-3.1-DEV',
-  'unifunc' => 'content_586ee5799e4d61_30768616',
+  'unifunc' => 'content_5a038198280ca7_61304041',
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_586ee5799e4d61_30768616')) {function content_586ee5799e4d61_30768616($_smarty_tpl) {?><?php if (!is_callable('smarty_function_repeat')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.repeat.php';
-if (!is_callable('smarty_modifier_cms_escape')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\modifier.cms_escape.php';
-if (!is_callable('smarty_modifier_date_format')) include 'C:\\xampp\\htdocs\\Simple_stocks\\lib\\smarty\\plugins\\modifier.date_format.php';
+<?php if ($_valid && !is_callable('content_5a038198280ca7_61304041')) {function content_5a038198280ca7_61304041($_smarty_tpl) {?><?php if (!is_callable('smarty_function_repeat')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.repeat.php';
+if (!is_callable('smarty_modifier_cms_escape')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\modifier.cms_escape.php';
+if (!is_callable('smarty_modifier_date_format')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\lib\\smarty\\plugins\\modifier.date_format.php';
 ?><!-- .news-summary wrapper --><article class='news-summary'><span class='heading'><span>News</span></span><ul class='category-list cf'><?php  $_smarty_tpl->tpl_vars['node'] = new Smarty_Variable; $_smarty_tpl->tpl_vars['node']->_loop = false;
  $_from = $_smarty_tpl->tpl_vars['cats']->value; if (!is_array($_from) && !is_object($_from)) { settype($_from, 'array');}
 foreach ($_from as $_smarty_tpl->tpl_vars['node']->key => $_smarty_tpl->tpl_vars['node']->value) {

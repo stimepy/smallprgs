@@ -1,17 +1,17 @@
-<?php /* Smarty version Smarty-3.1-DEV, created on 2017-01-05 18:31:53
+<?php /* Smarty version Smarty-3.1-DEV, created on 2017-11-08 16:13:43
          compiled from "tpl_top:10" */ ?>
-<?php /*%%SmartyHeaderCode:6706586ee579424188-91839421%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:106595a038197dcf386-34592522%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     '1d2564fb4117d48c4a4788fdc05bac4cc5af55a3' => 
     array (
       0 => 'tpl_top:10',
-      1 => '1483662539',
+      1 => '1510168142',
       2 => 'tpl_top',
     ),
   ),
-  'nocache_hash' => '6706586ee579424188-91839421',
+  'nocache_hash' => '106595a038197dcf386-34592522',
   'function' => 
   array (
   ),
@@ -21,13 +21,13 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => false,
   'version' => 'Smarty-3.1-DEV',
-  'unifunc' => 'content_586ee5795d5b77_99199528',
+  'unifunc' => 'content_5a038197e50235_30461255',
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_586ee5795d5b77_99199528')) {function content_586ee5795d5b77_99199528($_smarty_tpl) {?><?php if (!is_callable('smarty_function_cms_lang_info')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.cms_lang_info.php';
-if (!is_callable('smarty_function_uploads_url')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.uploads_url.php';
-if (!is_callable('smarty_function_title')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.title.php';
-if (!is_callable('smarty_function_cms_selflink')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.cms_selflink.php';
-if (!is_callable('smarty_cms_function_share_data')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.share_data.php';
+<?php if ($_valid && !is_callable('content_5a038197e50235_30461255')) {function content_5a038197e50235_30461255($_smarty_tpl) {?><?php if (!is_callable('smarty_function_cms_lang_info')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.cms_lang_info.php';
+if (!is_callable('smarty_function_uploads_url')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.uploads_url.php';
+if (!is_callable('smarty_function_title')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.title.php';
+if (!is_callable('smarty_function_cms_selflink')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.cms_selflink.php';
+if (!is_callable('smarty_cms_function_share_data')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.share_data.php';
 ?><?php echo CMS_Content_Block::smarty_fetch_pagedata(array(),$_smarty_tpl);?>
 <?php echo smarty_function_cms_lang_info(array('assign'=>'nls'),$_smarty_tpl);?>
 <?php ob_start();?><?php echo smarty_function_uploads_url(array(),$_smarty_tpl);?>

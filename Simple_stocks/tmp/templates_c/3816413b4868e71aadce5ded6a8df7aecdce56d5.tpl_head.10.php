@@ -1,17 +1,17 @@
-<?php /* Smarty version Smarty-3.1-DEV, created on 2017-01-05 18:31:53
+<?php /* Smarty version Smarty-3.1-DEV, created on 2017-11-08 16:13:44
          compiled from "tpl_head:10" */ ?>
-<?php /*%%SmartyHeaderCode:625586ee579ad3213-24217077%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:166305a038198338666-69614799%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     '3816413b4868e71aadce5ded6a8df7aecdce56d5' => 
     array (
       0 => 'tpl_head:10',
-      1 => '1483662539',
+      1 => '1510168142',
       2 => 'tpl_head',
     ),
   ),
-  'nocache_hash' => '625586ee579ad3213-24217077',
+  'nocache_hash' => '166305a038198338666-69614799',
   'function' => 
   array (
   ),
@@ -25,12 +25,12 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => false,
   'version' => 'Smarty-3.1-DEV',
-  'unifunc' => 'content_586ee579b21432_12972774',
+  'unifunc' => 'content_5a03819836b307_49903276',
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_586ee579b21432_12972774')) {function content_586ee579b21432_12972774($_smarty_tpl) {?><?php if (!is_callable('smarty_function_metadata')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.metadata.php';
-if (!is_callable('smarty_function_sitename')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.sitename.php';
-if (!is_callable('smarty_cms_function_cms_stylesheet')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.cms_stylesheet.php';
-if (!is_callable('smarty_function_cms_selflink')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.cms_selflink.php';
+<?php if ($_valid && !is_callable('content_5a03819836b307_49903276')) {function content_5a03819836b307_49903276($_smarty_tpl) {?><?php if (!is_callable('smarty_function_metadata')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.metadata.php';
+if (!is_callable('smarty_function_sitename')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.sitename.php';
+if (!is_callable('smarty_cms_function_cms_stylesheet')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.cms_stylesheet.php';
+if (!is_callable('smarty_function_cms_selflink')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.cms_selflink.php';
 ?><head>
         <meta charset='<?php echo $_smarty_tpl->tpl_vars['nls']->value->encoding();?>
 ' />

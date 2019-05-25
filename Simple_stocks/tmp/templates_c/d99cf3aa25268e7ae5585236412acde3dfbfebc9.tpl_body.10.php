@@ -1,17 +1,17 @@
-<?php /* Smarty version Smarty-3.1-DEV, created on 2017-01-05 18:31:53
+<?php /* Smarty version Smarty-3.1-DEV, created on 2017-11-08 16:13:43
          compiled from "tpl_body:10" */ ?>
-<?php /*%%SmartyHeaderCode:25913586ee579633789-16449502%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
+<?php /*%%SmartyHeaderCode:194865a038197e928d1-28116339%%*/if(!defined('SMARTY_DIR')) exit('no direct access allowed');
 $_valid = $_smarty_tpl->decodeProperties(array (
   'file_dependency' => 
   array (
     'd99cf3aa25268e7ae5585236412acde3dfbfebc9' => 
     array (
       0 => 'tpl_body:10',
-      1 => '1483662539',
+      1 => '1510168142',
       2 => 'tpl_body',
     ),
   ),
-  'nocache_hash' => '25913586ee579633789-16449502',
+  'nocache_hash' => '194865a038197e928d1-28116339',
   'function' => 
   array (
   ),
@@ -27,13 +27,13 @@ $_valid = $_smarty_tpl->decodeProperties(array (
   ),
   'has_nocache_code' => false,
   'version' => 'Smarty-3.1-DEV',
-  'unifunc' => 'content_586ee5796d78a8_94034843',
+  'unifunc' => 'content_5a03819804e3b2_45026830',
 ),false); /*/%%SmartyHeaderCode%%*/?>
-<?php if ($_valid && !is_callable('content_586ee5796d78a8_94034843')) {function content_586ee5796d78a8_94034843($_smarty_tpl) {?><?php if (!is_callable('smarty_function_anchor')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.anchor.php';
-if (!is_callable('smarty_function_root_url')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.root_url.php';
-if (!is_callable('smarty_function_sitename')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.sitename.php';
-if (!is_callable('smarty_function_global_content')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.global_content.php';
-if (!is_callable('smarty_function_cms_jquery')) include 'C:\\xampp\\htdocs\\Simple_stocks\\plugins\\function.cms_jquery.php';
+<?php if ($_valid && !is_callable('content_5a03819804e3b2_45026830')) {function content_5a03819804e3b2_45026830($_smarty_tpl) {?><?php if (!is_callable('smarty_function_anchor')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.anchor.php';
+if (!is_callable('smarty_function_root_url')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.root_url.php';
+if (!is_callable('smarty_function_sitename')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.sitename.php';
+if (!is_callable('smarty_function_global_content')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.global_content.php';
+if (!is_callable('smarty_function_cms_jquery')) include 'C:\\Users\\ksherrerd\\Desktop\\hph\\smallprgs\\Simple_stocks\\plugins\\function.cms_jquery.php';
 ?><body id='boxed' class='container page-wrapper page-<?php echo $_smarty_tpl->tpl_vars['page_alias']->value;?>
  page-<?php echo $_smarty_tpl->tpl_vars['content_id']->value;?>
 '>

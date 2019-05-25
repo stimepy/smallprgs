@@ -2,18 +2,18 @@
 if( !defined('CMS_VERSION') ){
     exit;
 }
-$this->CreatePermission(Holidays::MANAGE_PERM,'Portfolio');
+$this->CreatePermission(Stocks::MANAGE_PERM,'Manage Holidays');
 $db = $this->GetDb();
 $dict = NewDataDictionary($db);
 $taboptarray = array('mysql' => 'TYPE=MyISAM');
 $flds = "
-   city_id I KEY AUTO,
-   name C(255) KEY NOTNULL
+   id I KEY AUTO,
+   name C(255) KEY NOTNULL,
+   description X,
+   published I1,
+   the_date I NOTNULL
 ";
-$tablename = CMS_DB_PREFIX.'PM_city';
 $sqlarray = $dict->CreateTableSQL(
-    $tablename ,$flds,$taboptarray);
+    CMS_DB_PREFIX
+    .'mod_holidays',$flds,$taboptarray);
 $dict->ExecuteSQLArray($sqlarray);
-
-
-?>
