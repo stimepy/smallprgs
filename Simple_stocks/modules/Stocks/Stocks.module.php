@@ -11,9 +11,9 @@ class Stocks extends CMSModule{
     public function VisibleToAdminUser() {
         return $this->CheckPermission(self::MANAGE_PERM);
     }
-    public function GetAuthor() { return 'Your Name'; }
+    public function GetAuthor() { return 'Kris Sherrerd'; }
     public function GetAuthorEmail() {
-        return 'yourname@somedomain.com';
+        return 'stimepy@aodhome.com';
     }
     public function UninstallPreMessage() { return $this->Lang('ask_uninstall'); }
 
