@@ -1,14 +1,14 @@
 -- For porfolio 5   Update all numbers!
 
 insert into tranactions(port_id, act_id, cash, date_of_transaction, notes, credit_debit)
-values(5, 6, 325.42, STR_TO_DATE('01-17-2019','%m-%d-%Y'), null, 1);
+values(5, 6, 325.42, STR_TO_DATE('01-17-2020','%m-%d-%Y'), null, 1);
 
 
 
 insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id, Notes)
 select 5, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('01-03-2019','%m-%d-%Y'), -- date
+STR_TO_DATE('01-03-2020','%m-%d-%Y'), -- date
 0.654, -- # of shares
 248.79204893 , -- price
 0,  -- basic fee
@@ -20,7 +20,7 @@ where ticker = 'VFIAX'
 	union all
 select 5, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('01-03-2019','%m-%d-%Y'), -- date
+STR_TO_DATE('01-03-2020','%m-%d-%Y'), -- date
 3.467, -- # of shares
 23.46697433
  , -- price
@@ -33,7 +33,7 @@ where ticker = '@0001'
 	union all
 select 5, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('01-03-2019','%m-%d-%Y'), -- date
+STR_TO_DATE('01-03-2020','%m-%d-%Y'), -- date
 0.422, -- # of shares
 192.77251185, -- price
 0,  -- basic fee
@@ -87,7 +87,7 @@ join tranactions as t on temp_id = purc_sold_id
   
    -- Fee
   insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
-values(5, 11, 83.01, STR_TO_DATE('01-18-2019','%m-%d-%Y'), 0, null);
+values(5, 11, 83.01, STR_TO_DATE('01-18-2020','%m-%d-%Y'), 0, null);
   
   
   
@@ -179,14 +179,14 @@ join tranactions as t on temp_id = purc_sold_id
   
   
 insert into tranactions(port_id, act_id, cash, date_of_transaction, notes, credit_debit)
-values(20, 6, 325.42, STR_TO_DATE('06-22-2019','%m-%d-%Y'), null, 1);
+values(20, 6, 325.42, STR_TO_DATE('06-22-2020','%m-%d-%Y'), null, 1);
 
 
 
 insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id, Notes)
 select 20, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('06-22-2019','%m-%d-%Y'), -- date
+STR_TO_DATE('06-22-2020','%m-%d-%Y'), -- date
 0.654, -- # of shares
 248.79204893 , -- price
 0,  -- basic fee
@@ -194,11 +194,11 @@ STR_TO_DATE('06-22-2019','%m-%d-%Y'), -- date
 1,  -- action
 NULL -- Notes
 from stock_desc 
-where ticker = 'VFIAX'
+where ticker = 'VINIX'
 	union all
 select 20, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('06-22-2019','%m-%d-%Y'), -- date
+STR_TO_DATE('06-22-2020','%m-%d-%Y'), -- date
 3.467, -- # of shares
 23.46697433
  , -- price
@@ -211,7 +211,7 @@ where ticker = 'VBTLX'
 	union all
 select 20, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('06-22-2019','%m-%d-%Y'), -- date
+STR_TO_DATE('06-22-2020','%m-%d-%Y'), -- date
 0.422, -- # of shares
 192.77251185, -- price
 0,  -- basic fee
@@ -228,7 +228,7 @@ Join (
 		, port_id
 		,stock_id
 	FROM stock_purc_sold
-	WHERE STOCK_ID in (select stock_id from stock_desc where ticker in ('VEXAX', 'VFIAX', 'VBTLX'))
+	WHERE STOCK_ID in (select stock_id from stock_desc where ticker in ('VEXAX', 'VINIX', 'VBTLX'))
 	-- and port_id =
 	group by port_id, stock_id
 )b
