@@ -10,7 +10,7 @@ and div_record.div_amount is not NULL;
 update div_record as spc
 join tranactions as t on temp_id = div_rec_id
  set spc.trans_id = t.trans_id
- wherez t.temp_id is not null;
+ where t.temp_id is not null;
  
   update tranactions set temp_id = null where temp_id is not null;
   -- end div gotten
