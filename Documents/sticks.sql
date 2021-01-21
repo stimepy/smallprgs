@@ -15,45 +15,76 @@ join tranactions as t on temp_id = div_rec_id
   update tranactions set temp_id = null where temp_id is not null;
   -- end div gotten
   
+
   
-select s.stock_id, ticker, company_name, nm.shares 
-from stock_desc s
-left join stable_share_num nm
- using(stock_id)
-inner join stock_purc_sold sp
- on(sp.stock_id = s.stock_id 
-	and sp.port_id = nm.port_id)
-where s.currently_owned = 1
-	and nm.port_id = 2
-	and act_id = 1
-group by s.stock_id, ticker, company_name, nm.shares 
+-- Information on individual stock  
+SELECT sd.stock_id,
+sd.ticker,
+sd.company_name,
+sd.current_Quarterly_dividend,
+sd.payment_per_year,
+sd.website,
+COUNT(port_id),
+SUM(ssn.shares) Shares,
+case when ssn.currently_owned = 1 then 'Owned' ELSE NULL END Owned,
+sum(ssn.Price_per_share)/COUNT(port_id) Price_per_share,
+ssn.last_updated_dttm,
+ppsc.Price_per_share calulated_price_per_share
+FROM stock_desc sd
+INNER JOIN stable_share_num ssn
+USING(stock_id)
+LEFT JOIN(
+	SELECT stock_id, (price_per_share+coalesce(shares_sold, 0))/num_shares Price_per_share, shares_sold, price_per_share/num_shares, num_shares
+	FROM(
+		 SELECT SUM(case when spc.act_id IN(2,20) then -1 ELSE 1 END * spc.num_shares) num_shares, 
+		 SUM(	case when spc.act_id IN(2,20) then 0 ELSE 1 END * spc.price_per_share*spc.num_shares) price_per_share,
+		 SUM(	case when spc.act_id IN(2,20) then 1 ELSE 0 END * shares_sold) shares_sold
+		 ,spc.stock_id
+		 FROM stock_purc_sold spc
+		 left JOIN (
+			 SELECT stock_id, port_id,  sum(spc2.price_per_share * sl.share_num * -1) shares_sold
+			 From stocks_sale_lot sl
+			 LEFT JOIN stock_purc_sold spc2
+				ON(sl.purc_sold_id_buy = spc2.purc_sold_id)
+				GROUP BY  stock_id, port_id
+				having sum(spc2.price_per_share * sl.share_num * -1) <> 0
+		)salelot
+		ON(salelot.stock_id = spc.stock_id AND salelot.port_id = spc.port_id)
+	  -- WHERE spc.stock_id = 40 AND spc.port_id = 20
+		GROUP BY spc.stock_id
+	)c
+)ppsc
+on(ppsc.stock_id = sd.stock_id)
+ WHERE ticker = 'SCHD';
+
 
 
 
 select ticker, 
 	company_name, 
 	shares, 
-	round((total/shares),4) pps, 
+	round(price_per_share,4) pps, 
 	total total_purchase,  
 	total_wfee total_purchase_pluscomm,  
 	concat(cast(round((shares/tot_shares)*100,4) as char),'%') "% by stock", 
 	concat(cast(round((total/tot_price)*100,4) as char),'%') "% by value no fees",  
 	annual "Annual Dividend", 
 	shares * annual "Annual Tot Div" 
-	, concat(cast(round((annual/(total/shares))*100,4) as char),'%')  "Yield on Cost"
+	, concat(cast(round((annual/price_per_share)*100,4) as char),'%')  "Yield on Cost"
 -- 	, avg((annual/(total/shares))*100)
 	, payment_per_year "Payments Per Year"
 from(
 	select ticker, company_name, round(ssn.shares,4) shares, 
-		round(sum(case when act_id = 2 then -1*((num_shares*price_per_share))
-		else ((num_shares*price_per_share)) end),2) total,
-		round(sum(case when act_id = 2 then -1*((num_shares*price_per_share)+(initial_Fee+total_add_fees))
-		else ((num_shares*price_per_share)+(initial_Fee+total_add_fees)) end),2) total_wfee,
+		round(sum(case when act_id = 2 then -1*((num_shares*spc.price_per_share))
+		else ((num_shares*spc.price_per_share)) end),2) total,
+		round(sum(case when act_id = 2 then -1*((num_shares*spc.price_per_share)+(initial_Fee+total_add_fees))
+		else ((num_shares*spc.price_per_share)+(initial_Fee+total_add_fees)) end),2) total_wfee,
 		current_Quarterly_dividend quarterly, 
 		current_Quarterly_dividend*payment_per_year annual, 
 		case when payment_per_year is null then 0 else payment_per_year end payment_per_year,
 		tot_shares, 
-		tot_price
+		tot_price,
+		spc.price_per_share
 	from stock_desc sd
 	inner join stable_share_num ssn
 	 using(stock_id)
@@ -65,14 +96,14 @@ from(
 			tot_price, a.port_id
 		from stable_share_num ssn
 		inner join (
-			select round(sum(case when act_id in(2,20) then -1*((num_shares*price_per_share))
-								else ((num_shares*price_per_share)) 
+			select round(sum(case when act_id in(2,20) then -1*((num_shares*spc.price_per_share))
+								else ((num_shares*spc.price_per_share)) 
 						end),2) tot_price, ssn.port_id
 			from stable_share_num ssn
 			inner join stock_purc_sold spc
 			 on(ssn.stock_id = spc.stock_id
 				and ssn.port_id = spc.port_id)
-			where ssn.port_id = 6
+			where ssn.port_id = 7
 		)a
 		on(1=1)
 	where ssn.port_id = a.port_id
@@ -369,6 +400,18 @@ order by ex_div_date,announcement_date, payment_num
 group by ticker;
 
 
+-- Active options summary
+SELECT sd.ticker, so.Call_or_Put, so.strike, SUM(case when so.act_id <24 then 1 ELSE -1 END) contracts, sum(t.cash) "cost-profit"
+FROM stock_options_group sog
+INNER JOIN stock_options so
+USING(GROUP_id)
+INNER JOIN tranactions t
+USING(trans_id)
+INNER JOIN stock_desc sd
+ON(sog.stock_id = sd.stock_id)
+WHERE sog.current_contracts > 0
+GROUP BY sd.ticker, so.Call_or_Put, so.strike
+
 
 --Options summation
 select ticker, 
@@ -382,6 +425,7 @@ select ticker,
 	case when so2.act_desc is not null then act_desc else NULL end Expired,
 	cash "Protfit/Loss",
 	Week(so2.out_date)-minwk.wk
+	-- ,case when wash.group_id IS NOT NULL then 'W' ELSE NULL END "Wash Sale?"
 from stock_options_group sog
 inner join stock_options so
 using (group_id)
@@ -408,16 +452,32 @@ on(1=1)
 inner join stock_desc sd
 on(sog.stock_id = sd.stock_id)
 left JOIN (
-	select SUM(t2.cash) cash, so2.group_id 
+	select SUM(t2.cash + coalesce(t3.cash,0)) cash, so2.group_id 
 	from stock_options so2 
-	INNER JOIN tranactions t2
+	left JOIN tranactions t2
 	ON(t2.trans_id = so2.trans_id)
+	LEFT JOIN stock_purc_sold sps
+	USING(purc_sold_id)
+	left JOIN tranactions t3
+	ON(t3.trans_id = sps.trans_id)
 	GROUP BY so2.group_id
 )t
 on( t.group_id = so.group_id)
 Inner join stock_options_strategy
 using(strat_id)
+/*LEFT JOIN (
+	SELECT distinct  a.group_id -- , b.group_id
+FROM stock_options a
+INNER JOIN stock_options b
+USING (stock_id)
+WHERE a.group_id <> b.GROUP_id 
+	AND ( abs(DATEDIFF( a.action_date, b.action_date)) < 30 
+		AND a.strike = b.strike )
+) wash
+ON(wash.group_id = so.group_id) 
+*/
 where current_contracts <1
+-- AND EXTRACT(YEAR from so2.out_date) = EXTRACT(YEAR from NOW())
  group by ticker, sog.action_date, got_crdt_or_dbt, max_contracts, strategy_desc, sog.notes, so.experation_date_date,	so2.out_date, cash
 order by 	sog.action_date;
 
@@ -430,10 +490,57 @@ INNER JOIN stock_desc sd
 USING( stock_id)
 left JOIN tranactions 
 USING(trans_id)
-WHERE so.action_date > STR_TO_DATE('4-28-2020','%m-%d-%Y') 
+WHERE so.action_date > STR_TO_DATE('4-28-2021','%m-%d-%Y') 
 AND SO.act_id IN(24,25)
 ORDER BY action_date;
 
+
+-- washes for options
+SELECT distinct wash group_id, strike, 
+case when wash = ga then ca ELSE cb END wash_sale,
+ EXTRACT(YEAR FROM action_date) year 
+FROM(
+SELECT a.ga, a.gb, a.strike, ca, cb, 
+case when (ca < 0 AND cb > 0) OR (ca > 0 AND cb < 0) 
+	then case when ca < 0 then a.ga ELSE a.gb END 
+	ELSE 0 END wash
+FROM(
+	SELECT ga, gb, strike, sum(ca) ca
+	FROM(
+		SELECT a.group_id ga, b.group_id gb, a.strike,  t.cash ca -- , b.group_id gb, a.strike
+		FROM stock_options a
+		INNER JOIN stock_options b
+		USING (stock_id)
+		INNER JOIN tranactions t
+		ON(a.trans_id = t.trans_id)
+		WHERE a.group_id <> b.GROUP_id 
+			AND ( abs(DATEDIFF( a.action_date, b.action_date)) < 30 
+				AND a.strike = b.strike )
+		group by a.group_id,  b.group_id,  a.strike,  t.cash
+	)a
+	GROUP BY ga, strike, gb
+)a
+INNER JOIN(
+	SELECT ga, gb, strike, sum(cb) cb
+	FROM(
+		SELECT a.group_id ga, b.group_id gb, a.strike,  t.cash cb-- , b.group_id gb, a.strike
+		FROM stock_options a
+		INNER JOIN stock_options b
+		USING (stock_id)
+		INNER JOIN tranactions t
+		ON(b.trans_id = t.trans_id)
+		WHERE a.group_id <> b.GROUP_id 
+			AND ( abs(DATEDIFF( a.action_date, b.action_date)) < 30 
+				AND a.strike = b.strike )
+		group by a.group_id,  b.group_id,  a.strike,  t.cash
+	)a
+	GROUP BY ga, strike, gb
+)b
+ON(a.ga =b.ga and a.gb = b.gb AND  a.strike=b.strike)
+)washers
+LEFT JOIN stock_options_group
+ON(wash = GROUP_id)
+WHERE wash <> 0
 
 
 
@@ -447,10 +554,10 @@ where ticker = 'WEN'
 -- insert div
 insert into div_record(port_id, stock_id, payment_num, announcement_date, ex_div_date, record_date, pay_date, num_stocks, div_amount)
 select ssn.port_id, ssn.stock_id, case when pay.mxpmt is not null then pay.mxpmt  else 1 end mxpmt, 
-STR_TO_DATE('5-15-2020','%m-%d-%Y') announcement, 
-STR_TO_DATE('6-29-2020','%m-%d-%Y') ex_div_date, 
-STR_TO_DATE('7-3-2020','%m-%d-%Y') record_date, 
-STR_TO_DATE('7-17-2020','%m-%d-%Y') pay_date, 
+STR_TO_DATE('5-15-2021','%m-%d-%Y') announcement, 
+STR_TO_DATE('6-29-2021','%m-%d-%Y') ex_div_date, 
+STR_TO_DATE('7-3-2021','%m-%d-%Y') record_date, 
+STR_TO_DATE('7-17-2021','%m-%d-%Y') pay_date, 
 ssn.shares, sd.current_Quarterly_dividend
 from stock_desc sd
 inner join stable_share_num ssn
@@ -469,7 +576,7 @@ left join (
 )pay
 on(ssn.stock_id = pay.stock_id
 and ssn.port_id = pay.port_id)
-where sd.ticker = 'AFSI'												
+where sd.ticker = 'AFSI'
 
 
 
@@ -481,7 +588,7 @@ select 'EAT', 'NYSE', 'Brinker International, Inc.', 0.32, 4, 1, 'http://phx.cor
 insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id, Notes)
 select 3, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('10-15-2020','%m-%d-%Y'), -- date
+STR_TO_DATE('10-15-2021','%m-%d-%Y'), -- date
 20, -- # of shares
 59, -- price
 4.95,  -- basic fee
@@ -538,7 +645,7 @@ set a.num_stocks = b.num_stocks;
 -- trans
 insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
 select port_id, act_id, -- port and act id
-case when act_id = 1 then -1 else 1 end*((price_per_share*num_shares)+initial_Fee+total_add_fees), -- total cost
+case when act_id = 1 then -1 else 1 end*((price_per_share*num_shares)+(initial_Fee+total_add_fees)), -- total cost
 action_date,
 purc_sold_id,
 0 credit_debit
@@ -554,14 +661,40 @@ join tranactions as t on temp_id = purc_sold_id
  where t.temp_id is not null;
 
   update tranactions set temp_id = null where temp_id is not null;
- 
+  
+  
+  
+-- Update Price per share  
+UPDATE stable_share_num a
+LEFT JOIN(
+SELECT stock_id, port_id, (price_per_share+coalesce(shares_sold, 0))/num_shares Price_per_share, shares_sold, price_per_share/num_shares, num_shares
+	FROM(
+		 SELECT SUM(case when spc.act_id IN(2,20) then -1 ELSE 1 END * spc.num_shares) num_shares, 
+		 SUM(	case when spc.act_id IN(2,20) then 0 ELSE 1 END * spc.price_per_share*spc.num_shares) price_per_share,
+		 SUM(	case when spc.act_id IN(2,20) then 1 ELSE 0 END * shares_sold) shares_sold
+		 ,spc.stock_id
+		 ,spc.port_id
+		 FROM stock_purc_sold spc
+		 left JOIN (
+			 SELECT stock_id, port_id,  sum(spc2.price_per_share * sl.share_num * -1) shares_sold
+			 From stocks_sale_lot sl
+			 LEFT JOIN stock_purc_sold spc2
+				ON(sl.purc_sold_id_buy = spc2.purc_sold_id)
+				GROUP BY  stock_id, port_id
+				having sum(spc2.price_per_share * sl.share_num * -1) <> 0
+		)salelot
+		ON(salelot.stock_id = spc.stock_id AND salelot.port_id = spc.port_id)
+	  -- WHERE spc.stock_id = 40 AND spc.port_id = 20
+		GROUP BY spc.stock_id, spc.port_id
+	)c
+
+)b
+ON(a.stock_id =b.stock_id
+	AND a.port_id = b.port_id)
+SET a.Price_per_share = b.Price_per_share
+-- where a.port_id in(2)
   
  
--- insert interest
-insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
-values(3, 9, .04, STR_TO_DATE('04-16-2020','%m-%d-%Y'), 1, null);
-
-
 -- update historical div.
 insert into historical_div(stock_id, first_payment, quarterly, annual)
 select distinct stock_id, pay_date, div_amount, div_amount*payment_per_year
@@ -582,11 +715,15 @@ AND payment_per_year > 0;
 
 -- insert cash
 insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
-values(2, 6, 100, STR_TO_DATE('12-31-2020','%m-%d-%Y'), 1, null);
+values(2, 6, 100, STR_TO_DATE('12-31-2021','%m-%d-%Y'), 1, null);
 
 -- Withdrawl
 insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
-values(2, 7, 100, STR_TO_DATE('12-31-2020','%m-%d-%Y'), 1, null);
+values(2, 7, 100, STR_TO_DATE('12-31-2021','%m-%d-%Y'), 0, null);
+
+-- insert interest
+insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
+values(3, 9, .04, STR_TO_DATE('04-16-2021','%m-%d-%Y'), 1, null);
 
 
 -- update purchas/sale
@@ -659,7 +796,7 @@ SET a.calc_yield = b.per;
 insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id, Notes)
 select 3, -- port
  stock_id,  -- stock_id
-STR_TO_DATE('09-07-2020','%m-%d-%Y'), -- date
+STR_TO_DATE('09-07-2021','%m-%d-%Y'), -- date
 20, -- # of shares
 28.70, -- price
 4.95,  -- basic fee
@@ -682,7 +819,8 @@ Join (
 )b
 on (a.stock_id = b.Stock_id 
 	and a.port_id = b.port_id)
-set a.shares = b.shares, currently_owned = case when b.shares = 0 then 0 else currently_owned end;
+set a.shares = b.shares, currently_owned = case when b.shares = 0 then 0 else currently_owned end,
+a.Price_per_share = case when b.shares = 0 then NULL else a.Price_per_share end;
 
 -- insert the transaction
 insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
@@ -711,38 +849,71 @@ update stock_desc set currently_owned = 0 where ticker = 'CSX';
 
 
 
+
+-- Sale lot
+
+SELECT ss.purc_sold_id_buy, sps.num_shares, SUM(ss.share_num), sps.num_shares-SUM(ss.share_num)   
+FROM stocks_sale_lot ss
+INNER JOIN stock_purc_sold sps
+ON(sps.purc_sold_id = ss.purc_sold_id_buy)
+INNER JOIN stock_desc sd
+ON(sps.stock_id = sd.stock_id)
+WHERE sd.ticker = 'VIMAX'
+	AND sps.port_id = 5
+GROUP BY ss.purc_sold_id_buy;
+
+SELECT *
+from stock_purc_sold sps
+INNER JOIN stock_desc sd
+ON(sps.stock_id = sd.stock_id)
+WHERE sp.act_id = 2
+	and sd.ticker = 'VIMAX'
+	AND sps.port_id = 5
+	AND ACTION_date >= STR_TO_DATE('04-15-2021','%m-%d-%Y')
+
+
+INSERT into stocks_sale_lot(purc_sold_id, purc_sold_id_buy, share_num)
+values(913,304, 0.0470);
+
+-- end sale lot
+
+
+
+
+
 -- options getting in
-set @action_dates := STR_TO_DATE('11-07-2020','%m-%d-%Y');
-set @settle_dates := STR_TO_DATE('11-08-2020','%m-%d-%Y');
-set @expiration_dates := STR_TO_DATE('11-15-2020','%m-%d-%Y');
+set @action_dates := STR_TO_DATE('06-12-2021','%m-%d-%Y');
+set @settle_dates := STR_TO_DATE('06-15-2021','%m-%d-%Y');
+set @expiration_dates := STR_TO_DATE('06-12-2021','%m-%d-%Y');
 SET @ticker := 'AMZN';
 SET @contracts := 1;
+SET @port_id := 7;
 
-
-insert into stock_options_group(stock_id, port_id, action_date, strat_id, price_buy_in, got_crdt_or_dbt, current_contracts, max_contracts, collateral, Notes)
+ 
+insert into stock_options_group(stock_id, port_id, action_date, strat_id, got_crdt_or_dbt, current_contracts, max_contracts, collateral, Notes)
 select stock_id,
-7 port_id, 
+@port_id, 
 @action_dates action_date, 
-1 strat_id, 
-3.1 price_buy_in, 
+2 strat_id, 
 1 got_crdt_or_dbt, 
 @contracts current_contracts, 
 @contracts max_contracts, 
-2000 collateral, 
+1000 collateral, 
 NULL Notes
 from stock_desc
 where ticker = @ticker;
 
+
 insert into stock_options(port_id, stock_id, act_id, in_out, Call_or_Put, option_price, initial_fee, addition_total_fees, strike, contracts, action_date, Settle_date, experation_date_date, group_id)
-select 7 port_id, 
+select @port_id, 
 	stock_id,
 	22 act_id, 
 	1 in_out, 
-	'P' Call_or_Put, 
-	14.45 option_price, 
+	'C' Call_or_Put, 
+	7.53 option_price, 
 	0 initial_fee, 
 	0 addition_total_fees, 
-	1030 strike, 
+	2660 strike, 
 	@contracts contracts, 
 	@action_dates action_date, 
 	@settle_dates Settle_date, 
@@ -751,15 +922,15 @@ select 7 port_id,
 	from stock_desc
 	where ticker = @ticker
 	 	union all 
-	select 7 port_id, 
+	select @port_id, 
 	stock_id,
 	24 act_id, 
 	1 in_out, 
-	'P' Call_or_Put, 
-	17.55 option_price, 
+	'C' Call_or_Put, 
+	9.53 option_price, 
 	0 initial_fee, 
-	.03 addition_total_fees, 
-	1040 strike, 
+	.04 addition_total_fees, 
+	2650 strike, 
 	@contracts contracts, 
 	@action_dates action_date, 
 	@settle_dates Settle_date, 
@@ -769,12 +940,14 @@ select 7 port_id,
 	where ticker = @ticker
 	;
 
--- options getting out
 
-set @action_dates := STR_TO_DATE('11-01-2020','%m-%d-%Y');
-set @settle_dates := STR_TO_DATE('11-04-2020','%m-%d-%Y');
-SET @ticker := 'AMZN';
+
+-- options getting out
+set @action_dates := STR_TO_DATE('11-01-2021','%m-%d-%Y');
+set @settle_dates := STR_TO_DATE('11-04-2021','%m-%d-%Y');
+SET @ticker := 'SPY';
 SET @contracts := 1;
+SET @port_id := 7;
 
   insert into stock_options(port_id, stock_id, act_id, in_out, Call_or_Put, option_price, initial_fee, addition_total_fees, strike, contracts, action_date, Settle_date, experation_date_date, group_id)
 select distinct sog.port_id, 
@@ -807,22 +980,24 @@ select distinct sog.port_id,
 		ON(case when act.act_id = 25 then 22 END =so.act_id
 			or case when act.act_id = 23 then 24 END = so.act_id)
 	where ticker = @ticker
-		AND sog.PORT_id = 7
+		AND sog.PORT_id = @port_id 
 		AND so.in_out = 1
 		and sog.current_contracts >0
 		AND sog.action_date = so.action_date
-		-- and sog.action_date = STR_TO_DATE('2-22-2020','%m-%d-%Y')
+		-- and sog.action_date = STR_TO_DATE('2-22-2021','%m-%d-%Y')
 		;
 		
 		
 	
-	Update stock_options_group set current_contracts = 0, price_sell_out = 1.70, overall_gain_loss = 0
+	Update stock_options_group set current_contracts = 0, overall_gain_loss = 0, ExpiredWorthless = 0, Notes = NULL -- , daytrade = 1
 	where stock_id = (select stock_id from stock_desc where ticker =  @ticker)
-	and current_contracts > 0;
+		and port_id = @port_id 
+		and current_contracts > 0;
+		
 
 -- options Transactions
  insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
-select port_id, act_id, case when act_id in( 22, 23) then -1 else 1 end *(((100*contracts)*option_price)-addition_total_fees)
+select port_id, act_id, case when act_id in( 22, 23) then -1*(((100*contracts)*option_price)+((initial_fee+addition_total_fees))) else 1*(((100*contracts)*option_price)+((initial_fee+addition_total_fees)*-1)) end 
 , action_date, options_id, case when act_id in( 22, 23) then 0 else 1 end 
 from stock_options
 where action_date <= cast(now() as date)
@@ -839,15 +1014,34 @@ join tranactions as t on temp_id = options_id
 -- Fee fix options
 UPDATE tranactions t
 JOIN(
-	SELECT case when so.act_id in( 22, 23) then -1 else 1 end *(((100*contracts)*option_price)-addition_total_fees) so_Cash, cash, trans_id
+	SELECT case when so.act_id in( 22, 23) then -1*(((100*contracts)*option_price)+((initial_fee+addition_total_fees))) else 1*(((100*contracts)*option_price)+((initial_fee+addition_total_fees)*-1)) end  so_Cash, cash, trans_id
 	FROM stock_options so
 	INNER JOIN tranactions t
 	USING(trans_id)
-	WHERE cash <> case when so.act_id in( 22, 23) then -1 else 1 end *(((100*contracts)*option_price)-addition_total_fees)
+	WHERE cash <> case when so.act_id in( 22, 23) then -1*(((100*contracts)*option_price)+((initial_fee+addition_total_fees))) else 1*(((100*contracts)*option_price)+((initial_fee+addition_total_fees)*-1)) end 
 ) t2
 ON(t.trans_id = t2.trans_id)
-SET t.cash = t2.so_Cash
+SET t.cash = t2.so_Cash;
 
+
+
+-- if assigned
+UPDATE stock_options so
+JOIN(
+	SELECT so.options_id, asnd.purc_sold_id FROM stock_options so
+	INNER JOIN(
+		SELECT act_id, purc_sold_id, stock_id, action_date FROM stock_purc_sold 
+		WHERE act_id IN(27,28)
+	)asnd
+	ON(asnd.stock_id = so.stock_id
+		AND asnd.act_id = so.act_id
+		AND asnd.action_date = so.action_date)
+	WHERE so.stock_id = (SELECT stock_id FROM stock_desc WHERE ticker = 'AMZN')
+	AND so.act_id IN(27,28)
+	AND so.action_date = STR_TO_DATE('1-31-2021','%m-%d-%Y')
+)asnd
+ON(so.options_id = asnd.options_id)
+SET so.purc_sold_id = asnd.purc_sold_id;
 
 
 
@@ -859,44 +1053,82 @@ SELECT
 '912796WM7' CUSIP, 
 997.62 Amount, 
 1.556 Interest, 
-STR_TO_DATE('11-07-2020','%m-%d-%Y') Purchasedate, 
-STR_TO_DATE('11-12-2020','%m-%d-%Y') Issuedate, 
+STR_TO_DATE('11-07-2021','%m-%d-%Y') Purchasedate, 
+STR_TO_DATE('11-12-2021','%m-%d-%Y') Issuedate, 
 8 maturitylenthinweeks, 
 null maturitylenthinyears, 
-STR_TO_DATE('1-07-2020','%m-%d-%Y') min_redemption_date, 
-STR_TO_DATE('1-07-2020','%m-%d-%Y') max_redemption_date, 
+STR_TO_DATE('1-07-2021','%m-%d-%Y') min_redemption_date, 
+STR_TO_DATE('1-07-2021','%m-%d-%Y') max_redemption_date, 
 null Reinvestment_from, 
 null Notes;
 
 
-
 -- insterst for tresuries
-INSERT INTO interestbearing_purc_sold (port_id, _id, action_date, face_value, initial_Fee, total_add_fees, Interest, act_id, Notes)
-SELECT 
-port_id
-scrty_id,
-max_redemption_date action_date,
-Amount face_value,
-0 initial_Fee,
-0 total_add_fees,
-ROUND(Amount, -2)-Amount Interest,
-18 act_id,
-NULL  Notes
-from treasurysecurity
-WHERE max_redemption_date = STR_TO_DATE('11-12-2020','%m-%d-%Y')
-	UNION ALL 
-SELECT 
-	port_id
-	scrty_id,
-	IssueDate action_date,
-	Amount face_value,
-	0 initial_Fee,
-	0 total_add_fees,
-	0,
-	1 act_id,
-	NULL  Notes
-from treasurysecurity
-WHERE IssueDate = STR_TO_DATE('11-12-2020','%m-%d-%Y');
+  INSERT INTO interestbearing_purc_sold (port_id, _id, action_date, face_value, initial_Fee, total_add_fees, Interest, act_id)
+SELECT  i.port_id
+, i._id
+, t.MAX_redemption_date action_date
+, face_value
+, 0 initial_Fee
+, 0 total_add_fees
+,round(face_value + ((i.face_value*(t.interest/100))/case when t.maturitylenthinweeks = 26 then 2 ELSE 4 END)) - face_value  Interest
+, 18 act_id
+FROM interestbearing_purc_sold i
+INNER join treasurysecurity t
+ON(i._id = t.scrty_id)
+WHERE i.port_id = 22 
+AND i._id NOT IN(SELECT _id FROM interestbearing_purc_sold WHERE port_id = 22 and act_id = 18)
+AND t.security_type_id = 3  -- Tresure bills
+AND t.MAX_redemption_date <= STR_TO_DATE('01-15-2021','%m-%d-%Y')
+UNION ALL
+SELECT  t.port_id
+, t.scrty_id
+, t.Purchasedate action_date
+, amount
+, 0 initial_Fee
+, 0 total_add_fees
+,0  Interest
+, 1 act_id
+FROM treasurysecurity t
+WHERE t.scrty_id NOT IN(SELECT distinct _id FROM interestbearing_purc_sold WHERE port_id = 22 and act_id IN(1))
+AND t.security_type_id = 3  -- Tresure bills
+AND t.Purchasedate <= STR_TO_DATE('01-15-2021','%m-%d-%Y')
+
+
+
+-- Kickfurther summary
+SELECT  brandname, Coop_name, num_packages, price, k.esitmated_interest, k.first_estimated_paydate, i.action_date "In Date",
+ MIN(iw.action_date) "First Pay Date", MAX(iw.action_date) "Last Pay Date", -1*t1.cash Cost,  
+SUM(t2.cash) Recieved,
+ROUND((-1*t1.cash)*(k.esitmated_interest/100), 2) "Total Estimated Interest",
+SUM(iw.interest) "Interest Recieved",
+case when coalesce(t1.cash,0)+sum(coalesce(t2.cash,0)) < 0 then (-1*(coalesce(t1.cash,0)))+SUM(coalesce(t2.cash,0)) ELSE 0 end  "Left to Break even"
+,(SUM(iw.interest)/(-1*t1.cash)) "Percent interest"
+, k.deliquent
+FROM kicks k
+INNER JOIN kicks_brand 
+USING (brand_id)
+INNER JOIN interestbearing_purc_sold i
+ON(k.kick_id = i._id
+	AND k.port_id = i.port_id 
+	AND i.act_id = 1)
+INNER JOIN tranactions t1
+ON(i.Trans_id = t1.trans_id)
+LEFT JOIN interestbearing_purc_sold iw
+ON(k.kick_id = iw._id
+	AND k.port_id = iw.port_id 
+	AND iw.act_id = 18)
+left JOIN tranactions t2
+ON(iw.Trans_id = t2.trans_id)
+ GROUP BY brandname, Coop_name,num_packages, price, k.esitmated_interest, k.first_estimated_paydate, i.action_date, t1.cash
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
 
 
 /* End Year insert */
@@ -913,7 +1145,7 @@ Dividends_total,
 from(
 	Select 
 	6 port_id,
-	STR_TO_DATE('12-29-2020','%m-%d-%Y') market_end_date,
+	STR_TO_DATE('12-29-2021','%m-%d-%Y') market_end_date,
 	15133.08 Actual_cash_in_WFee,
 	15133.08 Actual_Cash_In_NFee,
 	16985.19 Value_of,
@@ -953,7 +1185,7 @@ and extract(YEAR from pay_date) = 2014
 
 
 Select * from(
-	select firstname, lastname, sum(cash) Owed 
+	select dr.debter_id, firstname, lastname, sum(cash) Owed 
 	from debter dr
 	inner join debts d
 	 on(dr.debter_id = d.debter_id)
@@ -987,8 +1219,7 @@ join tranactions as t on temp_id = debt_id
   -- end div gotten
 
 
-
--- Tax Liens OR securities!
+-- Tax Liens OR securities or kickfurther!
 
 insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
 select port_id, act_id, -- port and act id
@@ -1007,3 +1238,96 @@ join tranactions as t on temp_id = purc_sold_id
   update tranactions set temp_id = null where temp_id is not null;
   
   
+  
+-- interest on bonds.  
+  SELECT cusip, amount+interest 
+FROM(
+	SELECT t.scrty_id, CUSIP,  t.amount, SUM(coalesce(i.interest,0)) interest
+	FROM treasurysecurity t
+	left join interestgained_not_received  i
+	ON(t.scrty_id = i.scrty_id)
+	WHERE t.security_type_id IN(2,1)
+	GROUP BY t.scrty_id, t.amount, t.CUSIP
+)a
+
+
+
+
+
+
+
+ insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id, Notes)
+SELECT port_id,
+ case when stock ='CONS BALANCED LIFESTAGE FD' then 39
+  when stock ='VANGUARD 500 INDEX FD ADM SHS' then 40
+ when stock ='VANGUARD MID-CAP INDEX ADM SHS' then 46
+ END stock_id,
+ STR_TO_DATE(date_of, '%m/%d/%Y') action_date,
+ shares,
+ REPLACE(cash_in, '$','')/shares priceper,
+ 0 initfee,
+ 0 addfee,
+ case when actions = 'PURCHASE OF SHARES' then 1
+ ELSE 2 end act_id,
+case when abs(ROUND(REPLACE(cash_in, '$','')/shares,2) -REPLACE(priceper,'$','')) >.02 
+	then concat(CONCAT('Per Assoicated Bank ', priceper), CONCAT( ', Per Math $',  ROUND(REPLACE(cash_in, '$','')/shares,2)))
+ELSE NULL 
+END 
+FROM hsa401k_temp
+WHERE port_id = 5
+AND actions IN('PURCHASE OF SHARES', 'Sale OF SHARES');
+
+
+
+ insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
+SELECT port_id, 6, REPLACE(cash_in, '$',''), STR_TO_DATE(date_of,'%m/%d/%Y'), 1, NULL
+FROM hsa401k_temp
+WHERE port_id = 5
+AND actions = 'CASH RECEIPT' AND stock ='CASH'
+UNION 
+SELECT port_id, 11,SUM(-1*REPLACE(cash_in, '$','')), STR_TO_DATE(date_of,'%m/%d/%Y'), 0, NULL
+FROM hsa401k_temp
+WHERE port_id = 5
+AND actions = 'CASH DISBURSEMENT';
+
+
+
+ insert into stock_purc_sold(port_id, stock_id, action_date, num_shares, price_per_share, initial_Fee, total_add_fees, act_id, Notes)
+SELECT port_id,
+ case when stock ='VANGUARD INSTITUTIONAL INDEX' then 105
+  when stock ='VANGUARD TTL BND MRKT IDX ADM' then 59
+ when stock ='VANGUARD EXTENDED MRKT IND ADM' then 60
+ END stock_id,
+ STR_TO_DATE(date_of, '%m/%d/%Y') action_date,
+ abs(shares),
+cash_in/shares priceper,
+ 0 initfee,
+ 0 addfee,
+ case when actions IN('Investment Purchase', 'Reinvested Dividend', 'Reinvested Interest') then 1
+ ELSE 2 end act_id,
+ case when abs(ROUND(cash_in/shares,2) -priceper)  
+	 then concat(CONCAT('Per Assoicated Bank $', priceper), CONCAT( ', Per Math $',  ROUND(cash_in/shares,2))) 
+ ELSE NULL end
+FROM hsa401k_temp
+WHERE port_id = 20
+ AND actions IN('Investment Purchase', 'Reinvested Dividend', 'Reinvested Interest', 'Custodial Management Fee');
+
+
+ insert into tranactions(port_id, act_id, cash, date_of_transaction, credit_debit, notes)
+SELECT port_id, 
+case when actions = 'Investment Purchase - Cash receipt'
+	then 6
+	ELSE 11 end
+,cash_in, STR_TO_DATE(date_of,'%m/%d/%Y'), 
+case when actions = 'Investment Purchase - Cash receipt'
+	then 1
+	ELSE 0 end, NULL
+FROM hsa401k_temp
+WHERE port_id = 20
+AND ACTIONs IN( 'Investment Purchase - Cash receipt', 'Custodial Management Fee - Cash disbursement');
+
+ 
+
+
+
+
