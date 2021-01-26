@@ -1,5 +1,5 @@
 -- div gotten
-inbsert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
+insert into tranactions(port_id, act_id, cash, date_of_transaction, temp_id, credit_debit)
 select port_id, 8,  round((num_stocks* div_amount),2), pay_date, div_rec_id, 1
 from div_record
 where pay_date <= cast(now() as date)
